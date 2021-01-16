@@ -10,9 +10,7 @@ export class RestaurantsReslovers{
         return [];        
     }
     @Mutation(returns=>Boolean)
-    createRestaurant(
-        @Args()dto:CreateRestaurantDto
-    ):boolean{
+    createRestaurant(@Args()dto:CreateRestaurantDto):boolean{
         console.log(dto);
         return true;
     }
