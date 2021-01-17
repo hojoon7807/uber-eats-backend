@@ -1,23 +1,7 @@
-import { ArgsType, Field, InputType } from "@nestjs/graphql";
-import { IsBoolean, IsString, Length } from "class-validator";
+import { ArgsType, Field, InputType, OmitType } from "@nestjs/graphql";
+import { IsBoolean, IsNumber, IsString, Length } from "class-validator";
+import { Restaurant } from "../entities/restaurants.entity";
 
-@ArgsType() //InputType
-export class CreateRestaurantDto{
-    @Field(type=>String)
-    @IsString()
-    @Length(5,10)
-    name:string;
-
-    @Field(type=>Boolean)
-    @IsBoolean()
-    isVegan:boolean; 
-
-    @Field(type=>String)
-    @IsString()
-    address:string;
-
-    @Field(type=>String)
-    @IsString()
-    ownerName:string;
-}
-//npm i class-validator
+@InputType() //InputType
+export class CreateRestaurantDto extends OmitType(Restaurant,['id'],InputType){} //omit 명시한 컬럼을 제외한 테이블을 extends 레스토랑 테이블은 오브젝트 타입으로 정의되어있다.
+//npm i class-validator 

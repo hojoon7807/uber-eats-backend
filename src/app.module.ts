@@ -36,7 +36,7 @@ import { RestaurantsModule } from './restaurants/restaurants.module';
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME,
-      logging:true,
+      logging:process.env.NODE_ENV!=='prod',
       synchronize: process.env.NODE_ENV!=='prod',
       entities:[Restaurant]
   })], //root module 설정
