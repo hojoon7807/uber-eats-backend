@@ -6,6 +6,7 @@ import * as Joi from 'joi'; //타입스크립트가 아닌 자바스크립트 im
 import { join } from 'path';
 import { Restaurant } from './restaurants/entities/restaurants.entity';
 import { RestaurantsModule } from './restaurants/restaurants.module';
+import { UsersModule } from './users/users.module';
 
 
 
@@ -39,7 +40,8 @@ import { RestaurantsModule } from './restaurants/restaurants.module';
       logging:process.env.NODE_ENV!=='prod',
       synchronize: process.env.NODE_ENV!=='prod',
       entities:[Restaurant]
-  })], //root module 설정
+  }),
+  UsersModule], //root module 설정
   controllers: [],
   providers: [],
 })
