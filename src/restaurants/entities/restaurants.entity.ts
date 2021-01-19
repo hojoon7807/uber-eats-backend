@@ -1,5 +1,5 @@
 import { Field, InputType, ObjectType } from "@nestjs/graphql";
-import { IsBoolean, IsOptional, IsString } from "class-validator";
+import { IsBoolean, IsNumber, isNumber, IsOptional, IsString } from "class-validator";
 import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 
 // @InputType({isAbstract:true})
@@ -8,6 +8,7 @@ import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 export class Restaurant{
     @PrimaryGeneratedColumn()
     @Field(type=>Number)
+    @IsNumber()
     id:number;
 
     @Field(type=>String) //()=>String graphql에 타입정의
