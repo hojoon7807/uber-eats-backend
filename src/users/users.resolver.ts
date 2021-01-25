@@ -20,7 +20,7 @@ export class UsersResolver{
             return{
                 error,
                 ok:false
-            }
+            } 
         }
     }
 
@@ -31,5 +31,10 @@ export class UsersResolver{
         }catch(error){
             return {ok:false,error}
         }
+    }
+    
+    @Query(returns=>User)
+    me(){
+        
     }
 }

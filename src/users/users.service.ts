@@ -1,14 +1,18 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
+import * as jwt from "jsonwebtoken";
 import { CreateAccountInput } from "./dtos/create-account.dto";
 import { LoginInput } from "./dtos/login.dto";
 import { User } from "./entities/user.entity";
+import { ConfigService } from "@nestjs/config";
+import { JwtService } from "src/jwt/jwt.service";
 
 @Injectable()
 export class UsersService{
     constructor(
-        @InjectRepository(User) private readonly userRepo:Repository<User>
+        @InjectRepository(User) private readonly userRepo:Repository<User>,
+        private readonly jwtService:JwtService,
     ){}
     async createAccount({email,password,role}:CreateAccountInput):Promise<{ok:boolean; error?:string;}>{
         try{ //throw를 사용하지않는 go언어의 에러 방식
@@ -36,7 +40,8 @@ export class UsersService{
             if(!passwordCorrect){
                 return {ok:false,error:"Wrong password"};
             }
-            return {ok:true,token:"go"}
+            const token = this.jwtService.sign(user.id);
+            return {ok:true,token}
         }catch(error){
             return {ok:false,error}
         }
