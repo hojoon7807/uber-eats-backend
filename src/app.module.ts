@@ -10,14 +10,15 @@ import { UsersModule } from './users/users.module';
 import { CommonModule } from './common/common.module';
 import { User } from './users/entities/user.entity';
 import { JwtModule } from './jwt/jwt.module';
-
+import { JwtMiddleware } from './jwt/jwt.middleware';
 
 
 
 @Module({
   imports: [GraphQLModule.forRoot(
     {
-    autoSchemaFile: true  //스키마를 폴더상에 직접만들지 않고 메모리에 저장한다. //join(process.cwd(), 'src/schema.gql'),
+    autoSchemaFile: true,  //스키마를 폴더상에 직접만들지 않고 메모리에 저장한다. //join(process.cwd(), 'src/schema.gql'),
+    context:({req})=>{user:req['user']}
   }
   ),
   
@@ -54,4 +55,11 @@ import { JwtModule } from './jwt/jwt.module';
   controllers: [],
   providers: [],
 })
-export class AppModule {}
+export class AppModule implements NestModule{
+  configure(consumer:MiddlewareConsumer){
+    consumer.apply(JwtMiddleware).forRoutes({
+      path:'/graphql',
+      method:RequestMethod.POST
+    })
+  }
+}
