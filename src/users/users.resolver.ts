@@ -50,7 +50,6 @@ export class UsersResolver{
             const user = await this.usersService.findById(userProfileInput.userId)
         }catch(e){
             return {error:'Not Found User', ok:false}
-
     }
 }
 }
