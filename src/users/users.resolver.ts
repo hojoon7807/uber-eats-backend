@@ -48,6 +48,13 @@ export class UsersResolver{
     async serProfile(@Args()userProfileInput:UserProfileInput):Promise<UserProfileOutput>{
         try{
             const user = await this.usersService.findById(userProfileInput.userId)
+            if(!user){
+                throw Error();
+            }
+            return {
+                ok:true,
+                user
+            }
         }catch(e){
             return {error:'Not Found User', ok:false}
     }
