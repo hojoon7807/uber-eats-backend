@@ -2,13 +2,15 @@ import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import * as jwt from "jsonwebtoken";
-import { CreateAccountInput } from "./dtos/create-account.dto";
-import { LoginInput } from "./dtos/login.dto";
+import { CreateAccountInput, CreateAccountOutput } from "./dtos/create-account.dto";
+import { LoginInput, LoginOutput } from "./dtos/login.dto";
 import { User } from "./entities/user.entity";
 import { ConfigService } from "@nestjs/config";
 import { JwtService } from "src/jwt/jwt.service";
-import { EditProfileInput } from "./dtos/edit-profile.dto";
+import { EditProfileInput, EditProfileOutput } from "./dtos/edit-profile.dto";
 import { Verification } from "./entities/verification.entity";
+import { UserProfileOutput } from "./dtos/user-profile.dto";
+import { VerifyEmailOutput } from "./dtos/verify-email.dto";
 
 @Injectable()
 export class UsersService{
@@ -17,7 +19,7 @@ export class UsersService{
         @InjectRepository(Verification) private readonly verificationRepo:Repository<Verification>,
         private readonly jwtService:JwtService,
     ){}
-    async createAccount({email,password,role}:CreateAccountInput):Promise<{ok:boolean; error?:string;}>{
+    async createAccount({email,password,role}:CreateAccountInput):Promise<CreateAccountOutput>{
         try{ //throw를 사용하지않는 go언어의 에러 방식
             const exist = await this.userRepo.findOne({email});
             if(exist){
@@ -33,7 +35,7 @@ export class UsersService{
         // check new user
         // create user & hash password
     }
-    async login({email,password}:LoginInput):Promise<{ok:boolean; error?:string; token?:string;}>{
+    async login({email,password}:LoginInput):Promise<LoginOutput>{
         //1.유저찾기 2.비밀번호가 맞는지 확인하기 3.jwt 유저에게 넘겨주기
         try{
             const user = await this.userRepo.findOne({email},{select:["id","password"]});
@@ -51,33 +53,57 @@ export class UsersService{
             return {ok:false,error}
         }
     }
-    async findById(id:number):Promise<User>{
-        return await this.userRepo.findOne({id})
-    }
-    async editProfile(userId:number,{email,password}:EditProfileInput){
-        const user = await this.userRepo.findOne(userId);
-        if(email){
-            user.email = email
-            user.verified = false
-            await this.verificationRepo.save(this.verificationRepo.create({user}));
+    async findById(id:number):Promise<UserProfileOutput>{
+        try{
+            const user = await this.userRepo.findOne({id})
+            if(user){
+                return {
+                    ok:true,
+                    user
+                }
+            }
+        }catch(error){
+            return {
+                ok:false,
+                error:"Not Found User"}
         }
-        if(password){
-            user.password = password
-        }
-        return await this.userRepo.save(user);
     }
-    async verifyEmail(code:string):Promise<boolean>{
+    async editProfile(userId:number,{email,password}:EditProfileInput):Promise<EditProfileOutput>{
+        try{
+            const user = await this.userRepo.findOne(userId);
+            if(email){     
+                user.email = email
+                user.verified = false
+                await this.verificationRepo.save(this.verificationRepo.create({user}));
+            }
+            if(password){
+                user.password = password
+            }
+            await this.userRepo.save(user);
+            return {
+                ok:true
+            } 
+        }catch(error){
+            return{
+                ok:false,
+                error:"Could Not update Profile"
+            }
+        }
+    }
+    async verifyEmail(code:string):Promise<VerifyEmailOutput>{
         const verification = await this.verificationRepo.findOne({code},{relations:["user"]})
         try{
             if(verification){
                 verification.user.verified = true;
-                console.log(verification.user)
                 this.userRepo.save(verification.user)
-                return true
+                return {ok:true};
             }
-            throw new Error();
-        }catch(e){
-            return false
+            return{
+                ok:false,
+                error:"Verification Not Found"
+            }
+        }catch(error){
+            return {ok:false,error}
         }
     }
 } 
