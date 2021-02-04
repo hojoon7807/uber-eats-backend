@@ -64,7 +64,7 @@ export class UsersResolver{
 
     @UseGuards(AuthGuard)
     @Mutation(returns=>EditProfileOutput)
-    async editProfile(@AuthUser()authUser:User, @Args('input')editProfileInput:EditProfileInput){
+    async editProfile(@AuthUser()authUser:User, @Args('input')editProfileInput:EditProfileInput):Promise<EditProfileOutput>{
         try{
             await this.usersService.editProfile(authUser.id,editProfileInput);
             return{
@@ -78,8 +78,16 @@ export class UsersResolver{
         }
     }
     @Mutation(returns=>VerifyEmailOutput)
-    verifyEmail(@Args('input') verifyEmailInput:VerifyEmailInput){
-
+    async verifyEmail(@Args('input') verifyEmailInput:VerifyEmailInput):Promise<VerifyEmailOutput>{
+        try{
+            this.usersService.verifyEmail(verifyEmailInput.code)
+            return {ok:true}
+        }catch(error){
+            return {
+                ok:false,
+                error
+            }
+        }
     }
 
 }

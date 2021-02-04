@@ -36,7 +36,7 @@ export class UsersService{
     async login({email,password}:LoginInput):Promise<{ok:boolean; error?:string; token?:string;}>{
         //1.유저찾기 2.비밀번호가 맞는지 확인하기 3.jwt 유저에게 넘겨주기
         try{
-            const user = await this.userRepo.findOne({email});
+            const user = await this.userRepo.findOne({email},{select:["id","password"]});
             if(!user){
                 return {ok:false,error:"User not found"};
             }
@@ -44,6 +44,7 @@ export class UsersService{
             if(!passwordCorrect){
                 return {ok:false,error:"Wrong password"};
             }
+            console.log(user)
             const token = this.jwtService.sign(user.id);
             return {ok:true,token}
         }catch(error){
@@ -64,5 +65,19 @@ export class UsersService{
             user.password = password
         }
         return await this.userRepo.save(user);
+    }
+    async verifyEmail(code:string):Promise<boolean>{
+        const verification = await this.verificationRepo.findOne({code},{relations:["user"]})
+        try{
+            if(verification){
+                verification.user.verified = true;
+                console.log(verification.user)
+                this.userRepo.save(verification.user)
+                return true
+            }
+            throw new Error();
+        }catch(e){
+            return false
+        }
     }
 } 
