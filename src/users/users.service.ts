@@ -95,7 +95,8 @@ export class UsersService{
         try{
             if(verification){
                 verification.user.verified = true;
-                this.userRepo.save(verification.user)
+                await this.userRepo.save(verification.user)
+                await this.verificationRepo.delete(verification.id)
                 return {ok:true};
             }
             return{
