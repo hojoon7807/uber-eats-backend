@@ -11,6 +11,7 @@ import { EditProfileInput, EditProfileOutput } from "./dtos/edit-profile.dto";
 import { Verification } from "./entities/verification.entity";
 import { UserProfileOutput } from "./dtos/user-profile.dto";
 import { VerifyEmailOutput } from "./dtos/verify-email.dto";
+import { EmailService } from "src/email/email.service";
 
 @Injectable()
 export class UsersService{
@@ -18,6 +19,7 @@ export class UsersService{
         @InjectRepository(User) private readonly userRepo:Repository<User>,
         @InjectRepository(Verification) private readonly verificationRepo:Repository<Verification>,
         private readonly jwtService:JwtService,
+        private readonly emailService:EmailService,
     ){}
     async createAccount({email,password,role}:CreateAccountInput):Promise<CreateAccountOutput>{
         try{ //throw를 사용하지않는 go언어의 에러 방식
@@ -27,7 +29,8 @@ export class UsersService{
                 //make error
             }
             const user = await this.userRepo.save(this.userRepo.create({email,password,role}));
-            await this.verificationRepo.save(this.verificationRepo.create({user}));
+            const verification = await this.verificationRepo.save(this.verificationRepo.create({user}));
+            await this.emailService.sendVerificationEmail(user.email,verification.code);
             return {ok:true};
         }catch(error){
             return {ok:false,error:"Couldn't create account"}
@@ -74,7 +77,8 @@ export class UsersService{
             if(email){     
                 user.email = email
                 user.verified = false
-                await this.verificationRepo.save(this.verificationRepo.create({user}));
+                const verification = await this.verificationRepo.save(this.verificationRepo.create({user}));
+                await this.emailService.sendVerificationEmail(user.email,verification.code);
             }
             if(password){
                 user.password = password
