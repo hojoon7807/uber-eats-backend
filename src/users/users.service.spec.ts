@@ -8,12 +8,12 @@ import { Verification } from "./entities/verification.entity"
 import { UsersService } from "./users.service"
 
 
-const mockRepository = {
+const mockRepository = ()=>({
     findOne:jest.fn(),
     save:jest.fn(),
     create:jest.fn(),
     delete:jest.fn(),
-}
+}) //userRepo 와 verificationRepo가 다른 것으로 인식하기위해 함수로 선언
 const mockJwtService = {
     sign:jest.fn(),
     verify:jest.fn(),
@@ -31,10 +31,10 @@ describe("User Service", ()=>{
         const module = await Test.createTestingModule({
             providers:[
                 UsersService, {
-                    provide: getRepositoryToken(User), useValue:mockRepository
+                    provide: getRepositoryToken(User), useValue:mockRepository()
                 },
                 {
-                    provide: getRepositoryToken(Verification), useValue:mockRepository
+                    provide: getRepositoryToken(Verification), useValue:mockRepository()
                 },
                 {
                     provide: JwtService, useValue:mockJwtService
@@ -53,17 +53,25 @@ describe("User Service", ()=>{
     })
 
     describe("createAccount",()=>{
+        const createAccountArgs = 
+            {
+                email:"",
+                password:"",
+                role:0
+            }
+        
         it("should fail if user exist", async ()=>{
             usersRepository.findOne.mockResolvedValue({
                 id:1,
                 email:"test@gmail.com"
             })
-            const result = await service.createAccount({
-                email:"",
-                password:"",
-                role:0
-            })
-            expect(result).toMatchObject({ok:false, error:"There is a user with that email already"}})
+            const result = await service.createAccount(createAccountArgs)
+            expect(result).toMatchObject({ok:false, error:"There is a user with that email already"})
+        })
+        it("should create user",async ()=>{
+            usersRepository.findOne.mockReturnValue(undefined);
+            await service.createAccount(createAccountArgs);
+            expect(usersRepository.create).toHaveBeenCalledTimes(1)
         })
     })
     it.todo("createAccount")
