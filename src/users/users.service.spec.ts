@@ -1,5 +1,6 @@
 import { Test } from "@nestjs/testing"
 import { getRepositoryToken } from "@nestjs/typeorm"
+import create from "got/dist/source/create"
 import { EmailService } from "src/email/email.service"
 import { JwtService } from "src/jwt/jwt.service"
 import { Repository } from "typeorm"
@@ -27,6 +28,8 @@ type MockRepository<T= any> = Partial<Record<keyof Repository<T>,jest.Mock>>;
 describe("User Service", ()=>{
     let service:UsersService
     let usersRepository:MockRepository<User>
+    let verificationRepository:MockRepository<Verification>
+    let emailService:EmailService
     beforeAll(async () => {
         const module = await Test.createTestingModule({
             providers:[
@@ -44,8 +47,10 @@ describe("User Service", ()=>{
                 }
             ]
         }).compile();
-        service = module.get<UsersService>(UsersService)
-        usersRepository = module.get(getRepositoryToken(User))
+        service = module.get<UsersService>(UsersService);
+        emailService = module.get<EmailService>(EmailService)
+        usersRepository = module.get(getRepositoryToken(User));
+        verificationRepository = module.get(getRepositoryToken(Verification));
     })
     
     it("be define",()=>{
@@ -70,8 +75,22 @@ describe("User Service", ()=>{
         })
         it("should create user",async ()=>{
             usersRepository.findOne.mockReturnValue(undefined);
-            await service.createAccount(createAccountArgs);
-            expect(usersRepository.create).toHaveBeenCalledTimes(1)
+            usersRepository.create.mockReturnValue(createAccountArgs);
+            usersRepository.save.mockResolvedValue(createAccountArgs);
+            verificationRepository.create.mockReturnValue({user:createAccountArgs})
+            verificationRepository.save.mockResolvedValue({code:'code'})
+            const result = await service.createAccount(createAccountArgs);
+            expect(usersRepository.create).toHaveBeenCalledTimes(1);
+            expect(usersRepository.create).toHaveBeenCalledWith(createAccountArgs);
+            expect(usersRepository.save).toHaveBeenCalledTimes(1);
+            expect(usersRepository.save).toHaveBeenCalledWith(createAccountArgs);
+            expect(verificationRepository.create).toHaveBeenCalledTimes(1);
+            expect(verificationRepository.create).toHaveBeenCalledWith({user:createAccountArgs});
+            expect(verificationRepository.save).toHaveBeenCalledTimes(1);
+            expect(verificationRepository.save).toHaveBeenCalledWith({user:createAccountArgs});
+            expect(emailService.sendVerificationEmail).toHaveBeenCalledTimes(1);
+            expect(emailService.sendVerificationEmail).toHaveBeenCalledWith(expect.any(String),expect.any(String));
+            expect(result).toEqual({ok:true});
         })
     })
     it.todo("createAccount")
