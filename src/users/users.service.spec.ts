@@ -4,6 +4,7 @@ import create from "got/dist/source/create"
 import { EmailService } from "src/email/email.service"
 import { JwtService } from "src/jwt/jwt.service"
 import { Repository } from "typeorm"
+import { isGetAccessor } from "typescript"
 import { User } from "./entities/user.entity"
 import { Verification } from "./entities/verification.entity"
 import { UsersService } from "./users.service"
@@ -74,7 +75,7 @@ describe("User Service", ()=>{
             expect(result).toMatchObject({ok:false, error:"There is a user with that email already"})
         })
         it("should create user",async ()=>{
-            usersRepository.findOne.mockReturnValue(undefined);
+            usersRepository.findOne.mockResolvedValue(undefined);
             usersRepository.create.mockReturnValue(createAccountArgs);
             usersRepository.save.mockResolvedValue(createAccountArgs);
             verificationRepository.create.mockReturnValue({user:createAccountArgs})
@@ -92,9 +93,23 @@ describe("User Service", ()=>{
             expect(emailService.sendVerificationEmail).toHaveBeenCalledWith(expect.any(String),expect.any(String));
             expect(result).toEqual({ok:true});
         })
+        it("should fail on exception", async () => {
+            usersRepository.findOne.mockRejectedValue(new Error("error"));
+            const result = await service.createAccount(createAccountArgs);
+            expect(result).toEqual({ok:false,error:"Couldn't create account"})
+        })
     })
-    it.todo("createAccount")
-    it.todo("login")
+    describe("login",()=>{
+        const emailArgs = {
+            email:"test@gmail.com",
+            password:" "
+        }
+        it("should fail if user does not exist",async () => {
+            usersRepository.findOne.mockResolvedValue(undefined);
+            const result = await service.login(emailArgs);
+            expect(result).toEqual({ok:false,error:"User not found"})
+        })
+    })
     it.todo("findById")
     it.todo("editProfile")
     it.todo("verifyEmail")
