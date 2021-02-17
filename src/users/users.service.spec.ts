@@ -15,6 +15,7 @@ const mockRepository = ()=>({
     save:jest.fn(),
     create:jest.fn(),
     delete:jest.fn(),
+    findOneOrFail:jest.fn(),
 }) //userRepo 와 verificationRepo가 다른 것으로 인식하기위해 함수로 선언
 const mockJwtService = {
     sign:jest.fn(()=>'signed-token'),
@@ -136,11 +137,26 @@ describe("User Service", ()=>{
         it('should fail on exception', async () => {
             usersRepository.findOne.mockRejectedValue(new Error('new error!'));
             const result = await service.login(loginArgs);
-            console.log(result)
             expect(result).toEqual({ok:false,error:result.error});
         })
     })
-    it.todo("findById")
-    it.todo("editProfile")
+    describe("findById",()=>{
+        const findByIdArgs = {
+            id:1
+        }
+        it('should find an existing user',async () => {
+            usersRepository.findOneOrFail.mockResolvedValue(findByIdArgs);
+            const result = await service.findById(findByIdArgs.id);
+            expect(result).toEqual({ok:true,user:findByIdArgs});
+        })
+        it('should fail if no user is found',async () => {
+            usersRepository.findOneOrFail.mockRejectedValue(new Error());
+            const result = await service.findById(findByIdArgs.id);
+            expect(result).toEqual({ok:false,error:"Not Found User"});
+        })
+    })
+    describe("editProfile",()=>{
+        
+    })
     it.todo("verifyEmail")
 })

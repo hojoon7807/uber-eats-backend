@@ -58,7 +58,7 @@ export class UsersService{
     }
     async findById(id:number):Promise<UserProfileOutput>{
         try{
-            const user = await this.userRepo.findOne({id})
+            const user = await this.userRepo.findOneOrFail({id})
             if(user){
                 return {
                     ok:true,
