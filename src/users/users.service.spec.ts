@@ -156,7 +156,20 @@ describe("User Service", ()=>{
         })
     })
     describe("editProfile",()=>{
-        
+        const oldUser={ 
+            email:'old@User.com',
+            verified:true
+        };
+        const editProfileArgs = {
+            userId:1,
+            input:{email:'new@User.com'}
+        }
+        it('should change email',async () => {
+            usersRepository.findOne.mockResolvedValue(oldUser);
+            await service.editProfile(editProfileArgs.userId,editProfileArgs.input);
+            expect(usersRepository.findOne).toHaveBeenCalledTimes(1);
+            expect(usersRepository.findOne).toHaveBeenCalledWith(editProfileArgs.userId);
+        })
     })
     it.todo("verifyEmail")
 })
