@@ -201,5 +201,7 @@ describe("User Service", ()=>{
                 error:"Could Not update Profile"});
         })
     })
-    it.todo("verifyEmail")
+    describe("verifyEmail",()=>{
+        
+    })
 })
