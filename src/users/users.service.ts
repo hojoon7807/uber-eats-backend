@@ -95,8 +95,8 @@ export class UsersService{
         }
     }
     async verifyEmail(code:string):Promise<VerifyEmailOutput>{
-        const verification = await this.verificationRepo.findOne({code},{relations:["user"]})
         try{
+            const verification = await this.verificationRepo.findOne({code},{relations:["user"]})
             if(verification){
                 verification.user.verified = true;
                 await this.userRepo.save(verification.user)
@@ -108,7 +108,7 @@ export class UsersService{
                 error:"Verification Not Found"
             }
         }catch(error){
-            return {ok:false,error}
+            return {ok:false,error:"Could not Verify Email"}
         }
     }
 } 
