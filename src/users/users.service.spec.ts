@@ -56,9 +56,9 @@ describe("User Service", ()=>{
         verificationRepository = module.get(getRepositoryToken(Verification));
     })
     
-    it("be define",()=>{
-        expect(service).toBeDefined();
-    })
+        it("be define",()=>{
+            expect(service).toBeDefined();
+        })
 
     describe("createAccount",()=>{
         const createAccountArgs = 
