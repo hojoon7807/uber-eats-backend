@@ -229,5 +229,6 @@ describe("User Service", ()=>{
             const result = await service.verifyEmail(' ');
             expect(result).toEqual({ok:false,error:"Could not Verify Email"});
         });
+        
     })
 })

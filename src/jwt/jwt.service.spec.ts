@@ -3,14 +3,17 @@ import { CONFIG_OPTIONS } from "src/common/common.constant";
 import { JwtService } from "./jwt.service";
 import * as jwt from "jsonwebtoken";
 
+const ID = 1
+const TEST_KEY = 'testKey'
 //mock npm moodule
 jest.mock('jsonwebtoken',()=>{
     return{
-        sign:jest.fn(()=>'TOKEN')
+        sign:jest.fn(()=>'TOKEN'),
+        verify:jest.fn(()=>({id:ID}))
     }
     
 })
-const TEST_KEY = 'testKey'
+
 describe('Jwt Service',()=>{
     let service:JwtService;
     beforeEach(async () =>{
@@ -29,10 +32,17 @@ describe('Jwt Service',()=>{
     });
     describe('sign',()=>{
         it('should return signed token', async () => {
-            const ID = 1
             const token = service.sign(ID);
+            expect(typeof token).toBe('string');
             expect(jwt.sign).toHaveBeenCalledTimes(1);
             expect(jwt.sign).toHaveBeenCalledWith({id:ID},TEST_KEY);
+        });
+        it('should return the decoded token', async () => {
+            const TOKEN = 'TOKEN'
+            const decodedToken = service.verify(TOKEN);
+            expect(decodedToken).toEqual({id:ID});
+            expect(jwt.verify).toHaveBeenCalledTimes(1);
+            expect(jwt.verify).toHaveBeenCalledWith(TOKEN,TEST_KEY);
         })
     })
 })
