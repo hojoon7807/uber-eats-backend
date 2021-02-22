@@ -2,7 +2,7 @@ import { Test } from "@nestjs/testing";
 import { CONFIG_OPTIONS } from "src/common/common.constant";
 import { EmailService } from "./email.service"
 
-jest.mock('got',()=>{});
+jest.mock('got');
 jest.mock('form-data',()=>{
     return{
         append:jest.fn(()=>{})
@@ -27,5 +27,25 @@ describe('email service',()=>{
     });
     it('should be define',()=>{
         expect(service).toBeDefined();
+    });
+    describe('sendVerificationEmail', () => {
+        it('should call send email', ()=>{
+            const sendVerificationEmailArgs = {
+                email:'email',
+                code:'code'
+            };
+            jest.spyOn(service,'sendEmail').mockImplementation(async () => {})
+            service.sendVerificationEmail(sendVerificationEmailArgs.email,sendVerificationEmailArgs.code)
+            expect(service.sendEmail).toHaveBeenCalledTimes(1);
+            expect(service.sendEmail).toHaveBeenCalledWith("Verify your Email", "d",
+            [{key:"code",value:sendVerificationEmailArgs.code},
+            {key:"username",value:sendVerificationEmailArgs.email}]);
+        })
+    })
+    
+    describe('sendEmail',()=>{
+        it('should be send email',()=>{
+            service.sendEmail('','',[]);
+        })
     })
 })

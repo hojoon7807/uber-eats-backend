@@ -9,7 +9,7 @@ export class EmailService {
     constructor(
         @Inject(CONFIG_OPTIONS) private readonly options:EmailModuleOptions,
     ){}
-    private async sendEmail(subject:string, template:string, emailVars:EmailVar[]){
+    async sendEmail(subject:string, template:string, emailVars:EmailVar[]){
         const form = new FormData()
         form.append('from',`hojoon from uber eats <mailgun@${this.options.domain}>`)
         form.append('to',`ujuj0202@gmail.com`)
@@ -27,7 +27,7 @@ export class EmailService {
                 body:form,
             })
         }catch(error){
-            console.log(error)
+            
         }
     }
     sendVerificationEmail(email:string,code:string){
