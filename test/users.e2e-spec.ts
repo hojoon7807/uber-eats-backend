@@ -196,7 +196,22 @@ describe('UserModule (e2e)', () => {
       }).expect(200).expect(res=>{
         const {body:{data:{me:{email}}}} = res;
         expect(email).toBe('e2etest@gmail.com');
-      })
+      });
+    });
+    it('should not find my profile',()=>{
+      return request(app.getHttpServer()).post(GRAPHQL_ENDPOINT).send({
+        query:`
+        {
+          me{
+            email
+          }
+        }
+        `
+      }).expect(200).expect(res=>{
+        const {body:{errors}} = res;
+        const [error] = errors;
+        expect(error.message).toBe("Forbidden resource");
+      });
     })
   })
   it.todo('editProfile')
