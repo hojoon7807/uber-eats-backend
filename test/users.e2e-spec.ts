@@ -183,7 +183,22 @@ describe('UserModule (e2e)', () => {
     });
     });
   });
-  it.todo('me')
+  describe('me',()=>{
+    it('should find my profile',()=>{
+      return request(app.getHttpServer()).post(GRAPHQL_ENDPOINT).set('x-jwt',jwtToken).send({
+        query:`
+        {
+          me{
+            email
+          }
+        }
+        `
+      }).expect(200).expect(res=>{
+        const {body:{data:{me:{email}}}} = res;
+        expect(email).toBe('e2etest@gmail.com');
+      })
+    })
+  })
   it.todo('editProfile')
   it.todo('verifyEmail')
 });
